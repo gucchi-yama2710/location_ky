@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>山陰本線在線（米子 - 西出雲）</title>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: sans-serif;
+      padding: 10px;
+    }
+    .time {
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #ccc;
+    }
+    .railway {
+      display: flex;
+      align-items: flex-start;
+      margin-top: 10px;
+      position: relative;
+      white-space: nowrap;
+      overflow-x: auto;
+      width: 1430%;
+      height: 300px;
+      padding-top: 120px;
+    }
+    .railway::before {
+      content: "";
+      position: absolute;
+      top: 280px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #fff;
+      z-index: 0;
+    }
+    .station {
+      flex: 0 0 100px;
+      text-align: center;
+      position: relative;
+      margin-right: 20px;
+      z-index: 1;
+    }
+    .label {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 30px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+    .segment {
+      flex: 0 0 80px;
+      margin: 0 80px;
+    }
+    .train {
+      color: #fff;
+      padding: 2px 2px;
+      border-radius: 1px;
+      font-size: 14px;
+      white-space: nowrap;
+      display: inline-block;
+      line-height: 1.1;
+      position: absolute;
+      transform: translateX(-50%);
+      border: 2px solid #fff;
+      background: transparent;
+    }
+    .delayed {
+      border-color: red;
+      background-color: rgba(255, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+<h1>山陰本線在線（米子 - 西出雲）</h1>
+<div class="time">
+  <div>現在時刻: <span id="nowTime"></span></div>
+  <div>最終更新: <span id="updateTime"></span></div>
+</div>
+<div id="railway" class="railway"></div>
+
+<script>
+  const stations = [
+    { name: "", pos: 28 },{ name: "米　子", pos: 29 }, { name: "安　来", pos: 31 }, { name: "荒　島", pos: 32 },
+    { name: "揖　屋", pos: 33 }, { name: "東松江", pos: 34 }, { name: "松　江", pos: 35 }, { name: "乃　木", pos: 36 },
+    { name: "玉造温泉", pos: 37 }, { name: "来　待", pos: 38 }, { name: "宍　道", pos: 39 }, { name: "荘　原", pos: 40 },
+    { name: "直　江", pos: 41 }, { name: "出雲市", pos: 42 }, { name: "西出雲", pos: 43 }, 
+  ];
+
+  const formatTime = date => date.toLocaleTimeString('ja-JP', { hour12: false });
+
+  const updateClock = () => {
+    document.getElementById("nowTime").textContent = formatTime(new Date());
+  };
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  const getDirection = no => {
+    const num = parseInt(no, 10);
+    return isNaN(num) ? { arrow: "", class: "", offset: "none" } :
+      (num % 2 === 0 ? { arrow: "←", class: "train-up", offset: "down" } :
+                       { arrow: "→", class: "train-down", offset: "up" });
+  };
+
+  let stationOffsets = {};
+
+  const createTrainDiv = (train, dir) => {
+    const div = document.createElement("div");
+    div.className = `train ${dir.class}` + (train.delayMinutes ? " delayed" : "");
+    div.innerHTML = `${dir.arrow} ${train.no} | ${train.dest}` + (train.delayMinutes ? ` (+${train.delayMinutes})` : "");
+    return div;
+  };
+
+  const applyOffset = (pos, direction, div) => {
+    stationOffsets[pos] ||= { up: 0, down: 0 };
+    const offset = stationOffsets[pos][direction]++;
+    const baseTop = direction === "up" ? 120 - offset * 20 : 190 + offset * 20;
+    div.style.top = `${baseTop}px`;
+  };
+
+  const renderRailway = trains => {
+    const railway = document.getElementById("railway");
+    railway.innerHTML = "";
+    stationOffsets = {};
+
+    stations.forEach((station, i) => {
+      const stationDiv = document.createElement("div");
+      stationDiv.className = "station";
+      const label = document.createElement("div");
+      label.className = "label";
+      label.textContent = station.name;
+      stationDiv.appendChild(label);
+
+      trains.forEach(train => {
+        const pos = train.pos;
+        const dir = getDirection(train.no);
+        let display = false;
+        let offsetStyle = "50%";
+
+        if (typeof pos === "string" && pos.includes('_')) {
+          const [start, end] = pos.split('_').map(p => parseInt(p));
+          if (!isNaN(start) && isNaN(end) && start === station.pos) display = true;
+          else if (!isNaN(start) && !isNaN(end)) {
+            const displayPos = dir.offset === "down" ? Math.max(start, end) : Math.min(start, end);
+            if (displayPos === station.pos) {
+              display = true;
+              offsetStyle = dir.offset === "down" ? "calc(50% - 180px)" : "calc(50% + 180px)";
+            }
+          }
+        } else if (parseInt(pos) === station.pos) display = true;
+
+        if (display) {
+          const trainDiv = createTrainDiv(train, dir);
+          trainDiv.style.left = offsetStyle;
+          applyOffset(station.pos, dir.offset, trainDiv);
+          stationDiv.appendChild(trainDiv);
+        }
+      });
+
+      railway.appendChild(stationDiv);
+      if (i < stations.length - 1) railway.appendChild(document.createElement("div")).className = "segment";
+    });
+  };
+
+  const fetchTrains = async () => {
+  const urls = [
+    `https://api.allorigins.win/raw?url=https://www.train-guide.westjr.co.jp/api/v3/sanin4.json&t=${Date.now()}`
+  ];
+
+  try {
+    const results = await Promise.all(
+      urls.map(url =>
+        fetch(url).then(res => {
+          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+          return res.json();
+        })
+      )
+    );
+
+    const allTrains = results.flatMap(data => data.trains || []);
+    renderRailway(allTrains);
+    document.getElementById("updateTime").textContent = formatTime(new Date());
+  } catch (e) {
+    console.error("Failed to fetch train data:", e);
+    document.getElementById("updateTime").textContent = "データ取得に失敗しました";
+  }
+};
+
+
+  setInterval(fetchTrains, 5000);
+  fetchTrains();
+</script>
+
+</body>
+</html>
