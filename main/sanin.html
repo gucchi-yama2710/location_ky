@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>山陰本線在線（諸寄 - 益田）</title>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: sans-serif;
+      padding: 30px;
+    }
+    .time {
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #ccc;
+      position: fixed;
+      top: 10;
+      left: 0;
+      right: 0;
+      background: #111;
+      padding: 10px;
+      z-index: 10;
+      border-bottom: 1px solid #333;
+    }
+    .railway {
+      display: flex;
+      align-items: flex-start;
+      margin-top: 100px;
+      position: relative;
+      white-space: nowrap;
+      overflow-x: auto;
+      width: 1430%;
+      height: 300px;
+      padding-top: 120px;
+    }
+    .railway::before {
+      content: "";
+      position: absolute;
+      top: 280px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #fff;
+      z-index: 0;
+    }
+    .station {
+      flex: 0 0 100px;
+      text-align: center;
+      position: relative;
+      margin-right: 20px;
+      z-index: 1;
+    }
+    .label {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 30px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+    .segment {
+      flex: 0 0 80px;
+      margin: 0 80px;
+    }
+    .train {
+      color: #fff;
+      padding: 2px 2px;
+      border-radius: 1px;
+      font-size: 14px;
+      white-space: nowrap;
+      display: inline-block;
+      line-height: 1.1;
+      position: absolute;
+      transform: translateX(-50%);
+      border: 2px solid #fff;
+      background: transparent;
+    }
+    .delayed {
+      border-color: red;
+      background-color: rgba(255, 0, 0, 0.3);
+    }
+
+    .title {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #111;
+      color: #fff;
+      margin: 0;
+      padding: 10px 10px 0 10px;
+      font-size: 24px;
+      z-index: 11; /* `.time` より上に表示 */
+    }
+
+  #trainList {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 250px;
+    overflow-y: auto;
+    background-color: #222;
+    color: #fff;
+    padding: 10px;
+    border-top: 2px solid #555;
+    z-index: 1000;
+  }
+
+  .train-column {
+    display: inline-block;
+    vertical-align: top;
+    width: 49%;
+    padding: 5px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  th, td {
+    border: 1px solid #555;
+    padding: 4px;
+    text-align: center;
+  }
+
+  h2 {
+    margin: 5px 0;
+    font-size: 14px;
+  }
+  </style>
+</head>
+<body>
+
+<h1 class="title">山陰本線在線（諸寄 - 益田）</h1>
+<div class="time">
+  <div>現在時刻: <span id="nowTime"></span></div>
+  <div>最終更新: <span id="updateTime"></span></div>
+</div>
+<div id="railway" class="railway"></div>
+
+<script>
+  const stations = [
+    { name: "諸　寄", pos: 0 }, { name: "居　組", pos: 1 },{ name: "東　浜", pos: 2 }, { name: "岩　見", pos: 3 },
+    { name: "大　岩", pos: 4 }, { name: "福　部", pos: 5 },{ name: "鳥　取", pos: 6 }, { name: "湖　山", pos: 7 },
+    { name: "鳥取大学前", pos: 8 }, { name: "末　恒", pos: 9 },{ name: "宝　木", pos: 10 }, { name: "浜　村", pos: 11 },
+    { name: "青　谷", pos: 12 }, { name: "　泊　", pos: 13 }, { name: "松　崎", pos: 14 },
+    { name: "倉　吉", pos: 15 }, { name: "下北条", pos: 16 }, { name: "由　良", pos: 17 }, { name: "浦　安", pos: 18 },
+    { name: "八　橋", pos: 19 }, { name: "赤　崎", pos: 20 }, { name: "中山口", pos: 21 }, { name: "下　市", pos: 22 },
+    { name: "御来屋", pos: 23 }, { name: "名　和", pos: 24 }, { name: "大山口", pos: 25 }, { name: "淀　江", pos: 26 },
+    { name: "伯耆大山", pos: 27 },{ name: "東山公園", pos: 28 }, { name: "米　子", pos: 29 }, { name: "安　来", pos: 31 }, { name: "荒　島", pos: 32 },
+    { name: "揖　屋", pos: 33 }, { name: "東松江", pos: 34 }, { name: "松　江", pos: 35 }, { name: "乃　木", pos: 36 },
+    { name: "玉造温泉", pos: 37 }, { name: "来　待", pos: 38 }, { name: "宍　道", pos: 39 }, { name: "荘　原", pos: 40 },
+    { name: "直　江", pos: 41 }, { name: "出雲市", pos: 42 }, { name: "西出雲", pos: 43 }, { name: "出雲神西", pos: 44 },{ name: "江　南", pos: 45 },
+    { name: "小　田", pos: 46 }, { name: "田　儀", pos: 47 }, { name: "波　根", pos: 48 }, { name: "久　手", pos: 49 },
+    { name: "大田市", pos: 50 }, { name: "静　間", pos: 51 }, { name: "五十猛", pos: 52 }, { name: "仁　万", pos: 53 },
+    { name: "馬　路", pos: 54 }, { name: "湯　里", pos: 55 }, { name: "温泉津", pos: 56 }, { name: "石見福光", pos: 57 },
+    { name: "黒　松", pos: 58 }, { name: "浅　利", pos: 59 }, { name: "江　津", pos: 60 }, { name: "都野津", pos: 61 },
+    { name: "敬　川", pos: 62 }, { name: "波　子", pos: 63 }, { name: "久　代", pos: 64 }, { name: "下　府", pos: 65 },
+    { name: "浜　田", pos: 66 }, { name: "西浜田", pos: 67 }, { name: "周　布", pos: 68 }, { name: "折　居", pos: 69 },
+    { name: "三保三隅", pos: 70 }, { name: "岡　見", pos: 71 }, { name: "鎌　手", pos: 72 }, { name: "石見津田", pos: 73 },
+    { name: "益　田", pos: 74 }, { name: "", pos: 75 }
+  ];
+
+  const formatTime = date => date.toLocaleTimeString('ja-JP', { hour12: false });
+
+  const updateClock = () => {
+    document.getElementById("nowTime").textContent = formatTime(new Date());
+  };
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  const getDirection = no => {
+    const num = parseInt(no, 10);
+    return isNaN(num) ? { arrow: "", class: "", offset: "none" } :
+      (num % 2 === 0 ? { arrow: "←", class: "train-up", offset: "down" } :
+                       { arrow: "→", class: "train-down", offset: "up" });
+  };
+
+  let stationOffsets = {};
+
+  const createTrainDiv = (train, dir) => {
+    const div = document.createElement("div");
+    div.className = `train ${dir.class}` + (train.delayMinutes ? " delayed" : "");
+    div.innerHTML = `${dir.arrow} ${train.no} | ${train.dest}` + (train.delayMinutes ? ` (+${train.delayMinutes})` : "");
+    return div;
+  };
+
+  const applyOffset = (pos, direction, div) => {
+    stationOffsets[pos] ||= { up: 0, down: 0 };
+    const offset = stationOffsets[pos][direction]++;
+    const baseTop = direction === "up" ? 120 - offset * 20 : 190 + offset * 20;
+    div.style.top = `${baseTop}px`;
+  };
+
+  const renderRailway = trains => {
+    const railway = document.getElementById("railway");
+    railway.innerHTML = "";
+    stationOffsets = {};
+
+    stations.forEach((station, i) => {
+      const stationDiv = document.createElement("div");
+      stationDiv.className = "station";
+      const label = document.createElement("div");
+      label.className = "label";
+      label.textContent = station.name;
+      stationDiv.appendChild(label);
+
+      trains.forEach(train => {
+        const pos = train.pos;
+        const dir = getDirection(train.no);
+        let display = false;
+        let offsetStyle = "50%";
+
+        if (typeof pos === "string" && pos.includes('_')) {
+          const [start, end] = pos.split('_').map(p => parseInt(p));
+          if (!isNaN(start) && isNaN(end) && start === station.pos) display = true;
+          else if (!isNaN(start) && !isNaN(end)) {
+            const displayPos = dir.offset === "down" ? Math.max(start, end) : Math.min(start, end);
+            if (displayPos === station.pos) {
+              display = true;
+              offsetStyle = dir.offset === "down" ? "calc(50% - 180px)" : "calc(50% + 180px)";
+            }
+          }
+        } else if (parseInt(pos) === station.pos) display = true;
+
+        if (display) {
+          const trainDiv = createTrainDiv(train, dir);
+          trainDiv.style.left = offsetStyle;
+          applyOffset(station.pos, dir.offset, trainDiv);
+          stationDiv.appendChild(trainDiv);
+        }
+      });
+
+      railway.appendChild(stationDiv);
+      if (i < stations.length - 1) railway.appendChild(document.createElement("div")).className = "segment";
+    });
+  };
+
+  const fetchTrains = async () => {
+  const urls = [
+    `https://api.allorigins.win/raw?url=https://www.train-guide.westjr.co.jp/api/v3/sanin4.json&t=${Date.now()}`,
+    `https://api.allorigins.win/raw?url=https://www.train-guide.westjr.co.jp/api/v3/sanin3.json&t=${Date.now()}`
+  ];
+
+
+
+
+
+const renderTrainList = trains => {
+  const container = document.getElementById("trainList");
+  if (!container) return;
+
+  // posが範囲の場合、最小値（上り）や最大値（下り）で比較
+  const getPosValue = pos => {
+  if (typeof pos === "string" && pos.includes("_")) {
+    const [start] = pos.split("_");
+    return Number(start);  // 常に開始位置のみ使用
+  }
+  return Number(pos);
+};
+
+
+  // 上下を分けて、ここで個別に並び替え
+const upTrains = trains
+  .filter(train => parseInt(train.no) % 2 === 0)
+  .sort((a, b) => getPosValue(b.pos) - getPosValue(a.pos)); // 上り → 降順に変更
+
+const downTrains = trains
+  .filter(train => parseInt(train.no) % 2 === 1)
+  .sort((a, b) => getPosValue(a.pos) - getPosValue(b.pos)); // 下り → 昇順に変更
+
+
+  const makeTable = trainArray => {
+    let html = `<table><thead><tr>
+      <th>列車番号</th><th>行き先</th><th>位置</th><th>遅延</th>
+    </tr></thead><tbody>`;
+
+    trainArray.forEach(train => {
+      let location;
+      if (typeof train.pos === "string" && train.pos.includes("_")) {
+        const [from, to] = train.pos.split("_");
+        const fromName = stations.find(s => s.pos == from)?.name || from;
+        const toName = stations.find(s => s.pos == to)?.name || to;
+        location = `駅間（${fromName} → ${toName}）`;
+      } else {
+        location = stations.find(s => s.pos == train.pos)?.name || "不明";
+      }
+
+      html += `<tr>
+        <td>${train.no}</td>
+        <td>${train.dest}</td>
+        <td>${location}</td>
+        <td>${train.delayMinutes ? `${train.delayMinutes}分` : "定刻"}</td>
+      </tr>`;
+    });
+
+    html += "</tbody></table>";
+    return html;
+  };
+
+  container.innerHTML = `
+    <div class="train-column">
+      <h2>⬅ 上り（降順）</h2>
+      ${makeTable(upTrains)}
+    </div>
+    <div class="train-column">
+      <h2>下り（昇順） ➡</h2>
+      ${makeTable(downTrains)}
+    </div>
+  `;
+};
+
+
+
+
+
+
+
+
+
+  try {
+    const results = await Promise.all(
+      urls.map(url =>
+        fetch(url).then(res => {
+          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+          return res.json();
+        })
+      )
+    );
+
+    const allTrains = results.flatMap(data => data.trains || []);
+    renderRailway(allTrains);
+    renderTrainList(allTrains);
+
+    document.getElementById("updateTime").textContent = formatTime(new Date());
+  } catch (e) {
+    console.error("Failed to fetch train data:", e);
+    document.getElementById("updateTime").textContent = "データ取得に失敗しました";
+  }
+};
+
+
+  setInterval(fetchTrains, 5000);
+  fetchTrains();
+</script>
+<!-- 🚋 列車一覧表示エリア -->
+<div id="trainList" class="train-list"></div>
+
+</body>
+</html>
