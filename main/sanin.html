@@ -283,11 +283,16 @@ const downTrains = trains
     trainArray.forEach(train => {
       let location;
       if (typeof train.pos === "string" && train.pos.includes("_")) {
-        const [from, to] = train.pos.split("_");
-        const fromName = stations.find(s => s.pos == from)?.name || from;
-        const toName = stations.find(s => s.pos == to)?.name || to;
-        location = `駅間（${fromName} → ${toName}）`;
-      } else {
+  const [from, to] = train.pos.split("_");
+  const fromName = stations.find(s => s.pos == from)?.name || from;
+  const toName = stations.find(s => s.pos == to)?.name || to;
+
+  const isUp = parseInt(train.no) % 2 === 0;
+  location = isUp
+    ? `駅間（${toName} ← ${fromName}）`
+    : `駅間（${fromName} → ${toName}）`;
+}
+ else {
         location = stations.find(s => s.pos == train.pos)?.name || "不明";
       }
 
