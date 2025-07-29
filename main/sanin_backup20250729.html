@@ -145,9 +145,8 @@
 
 <script>
   const stations = [
-    { name: "　", pos: 　100 },
-    { name: "諸　寄", pos: 408 }, { name: "居　組", pos: 0 },{ name: "東　浜", pos: 1 }, { name: "岩　見", pos: 2 },
-    { name: "大　岩", pos: 3 }, { name: "福　部", pos: 4 },{ name: "鳥　取", pos: 6 }, { name: "湖　山", pos: 7 },
+    { name: "諸　寄", pos: 0 }, { name: "居　組", pos: 1 },{ name: "東　浜", pos: 2 }, { name: "岩　見", pos: 3 },
+    { name: "大　岩", pos: 4 }, { name: "福　部", pos: 5 },{ name: "鳥　取", pos: 6 }, { name: "湖　山", pos: 7 },
     { name: "鳥取大学前", pos: 8 }, { name: "末　恒", pos: 9 },{ name: "宝　木", pos: 10 }, { name: "浜　村", pos: 11 },
     { name: "青　谷", pos: 12 }, { name: "　泊　", pos: 13 }, { name: "松　崎", pos: 14 },
     { name: "倉　吉", pos: 15 }, { name: "下北条", pos: 16 }, { name: "由　良", pos: 17 }, { name: "浦　安", pos: 18 },
@@ -354,7 +353,8 @@ const downTrains = trains
   setInterval(fetchTrains, 5000);
   fetchTrains();
 </script>
-
+<!-- 🚋 列車一覧表示エリア -->
+<div id="trainList" class="train-list"></div>
 
 </body>
 </html>

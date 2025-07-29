@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>山陽本線在線（糸崎 - 南岩国）</title>
+  <title>山陽本線在線（糸崎 - 徳山）</title>
   <style>
     body {
       background: #111;
@@ -136,7 +136,7 @@
 </head>
 <body>
 
-<h1 class="title">山陽本線在線（糸崎 - 南岩国）</h1>
+<h1 class="title">山陽本線在線（糸崎 - 徳山）</h1>
 <div class="time">
   <div>現在時刻: <span id="nowTime"></span></div>
   <div>最終更新: <span id="updateTime"></span></div>
@@ -148,7 +148,7 @@
     { name: "糸　崎", pos: 106 }, { name: "三　原", pos: 107 },{ name: "本　郷", pos: 108 }, { name: "河　内", pos: 109 },
     { name: "入　野", pos: 110 }, { name: "白　市", pos: 111 },{ name: "西高屋", pos: 112 }, { name: "西　条", pos: 113 },{ name: "寺　家", pos: 447 },
     { name: "八本松", pos: 114 }, { name: "瀬　野", pos: 115 },{ name: "中野東", pos: 116 }, { name: "安芸中野", pos: 117 },
-    { name: "海田市", pos: 118 }, { name: "向　洋", pos: 119 }, { name: "天神川", pos: 120 },
+    { name: "海田市", pos: 118 }, { name: "向　洋", pos: 119 }, { name: "天神川", pos: 120 },{ name: "((芸)矢賀)", pos: 664 },
     { name: "広　島", pos: 122 }, { name: "新白島", pos: 123 }, { name: "横　川", pos: 124 },
     { name: "西広島", pos: 125 }, { name: "新井口", pos: 126 }, { name: "五日市", pos: 127 }, { name: "廿日市", pos: 128 }, 
     { name: "宮内串戸", pos: 129 },{ name: "阿　品", pos: 130 }, { name: "宮島口", pos: 131 }, { name: "前　空", pos: 132 },
@@ -239,7 +239,8 @@
   const fetchTrains = async () => {
   const urls = [
     `https://api.allorigins.win/raw?url=https://www.train-guide.westjr.co.jp/api/v3/sanyo2.json&t=${Date.now()}`,
-    `https://api.allorigins.win/raw?url=https://www.train-guide.westjr.co.jp/api/v3/sanyo3.json&t=${Date.now()}`
+    `https://api.allorigins.win/raw?url=https://www.train-guide.westjr.co.jp/api/v3/sanyo3.json&t=${Date.now()}`,
+    `https://api.allorigins.win/raw?url=https://www.train-guide.westjr.co.jp/api/v3/geibi1.json&t=${Date.now()}`
   ];
 
 

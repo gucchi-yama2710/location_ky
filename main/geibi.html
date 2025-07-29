@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>山陰本線在線（諸寄 - 益田）</title>
+  <title>芸備線在線（三次 - 広島）</title>
   <style>
     body {
       background: #111;
@@ -136,7 +136,7 @@
 </head>
 <body>
 
-<h1 class="title">山陰本線在線（諸寄 - 益田）</h1>
+<h1 class="title">芸備線在線（三次 - 広島）</h1>
 <div class="time">
   <div>現在時刻: <span id="nowTime"></span></div>
   <div>最終更新: <span id="updateTime"></span></div>
@@ -145,26 +145,16 @@
 
 <script>
   const stations = [
-    { name: "　", pos: 　100 },
-    { name: "諸　寄", pos: 408 }, { name: "居　組", pos: 0 },{ name: "東　浜", pos: 1 }, { name: "岩　見", pos: 2 },
-    { name: "大　岩", pos: 3 }, { name: "福　部", pos: 4 },{ name: "鳥　取", pos: 6 }, { name: "湖　山", pos: 7 },
-    { name: "鳥取大学前", pos: 8 }, { name: "末　恒", pos: 9 },{ name: "宝　木", pos: 10 }, { name: "浜　村", pos: 11 },
-    { name: "青　谷", pos: 12 }, { name: "　泊　", pos: 13 }, { name: "松　崎", pos: 14 },
-    { name: "倉　吉", pos: 15 }, { name: "下北条", pos: 16 }, { name: "由　良", pos: 17 }, { name: "浦　安", pos: 18 },
-    { name: "八　橋", pos: 19 }, { name: "赤　崎", pos: 20 }, { name: "中山口", pos: 21 }, { name: "下　市", pos: 22 },
-    { name: "御来屋", pos: 23 }, { name: "名　和", pos: 24 }, { name: "大山口", pos: 25 }, { name: "淀　江", pos: 26 },
-    { name: "伯耆大山", pos: 27 },{ name: "東山公園", pos: 28 }, { name: "米　子", pos: 29 }, { name: "安　来", pos: 31 }, { name: "荒　島", pos: 32 },
-    { name: "揖　屋", pos: 33 }, { name: "東松江", pos: 34 }, { name: "松　江", pos: 35 }, { name: "乃　木", pos: 36 },
-    { name: "玉造温泉", pos: 37 }, { name: "来　待", pos: 38 }, { name: "宍　道", pos: 39 }, { name: "荘　原", pos: 40 },
-    { name: "直　江", pos: 41 }, { name: "出雲市", pos: 42 }, { name: "西出雲", pos: 43 }, { name: "出雲神西", pos: 44 },{ name: "江　南", pos: 45 },
-    { name: "小　田", pos: 46 }, { name: "田　儀", pos: 47 }, { name: "波　根", pos: 48 }, { name: "久　手", pos: 49 },
-    { name: "大田市", pos: 50 }, { name: "静　間", pos: 51 }, { name: "五十猛", pos: 52 }, { name: "仁　万", pos: 53 },
-    { name: "馬　路", pos: 54 }, { name: "湯　里", pos: 55 }, { name: "温泉津", pos: 56 }, { name: "石見福光", pos: 57 },
-    { name: "黒　松", pos: 58 }, { name: "浅　利", pos: 59 }, { name: "江　津", pos: 60 }, { name: "都野津", pos: 61 },
-    { name: "敬　川", pos: 62 }, { name: "波　子", pos: 63 }, { name: "久　代", pos: 64 }, { name: "下　府", pos: 65 },
-    { name: "浜　田", pos: 66 }, { name: "西浜田", pos: 67 }, { name: "周　布", pos: 68 }, { name: "折　居", pos: 69 },
-    { name: "三保三隅", pos: 70 }, { name: "岡　見", pos: 71 }, { name: "鎌　手", pos: 72 }, { name: "石見津田", pos: 73 },
-    { name: "益　田", pos: 74 }, { name: "", pos: 75 }
+    { name: "　", pos: 0 },
+    { name: "三　次", pos: 645 }, { name: "西三次", pos: 646 },
+    { name: "志和地", pos: 647 }, { name: "上川立", pos: 648 },
+    { name: "甲　立", pos: 649 },{ name: "吉田口", pos: 650 }, { name: "向　原", pos: 651 }, { name: "井原市", pos: 652 },
+    { name: "志和口", pos: 653 },
+    { name: "上三田", pos: 654 }, { name: "中三田", pos: 655 }, { name: "白木山", pos: 656 }, { name: "狩留家", pos: 657 },
+    { name: "上深川", pos: 658 }, { name: "中深川", pos: 659 }, { name: "下深川", pos: 660 }, { name: "玖　村", pos: 661 },
+    { name: "安芸矢口", pos: 662 }, { name: "戸　坂", pos: 663 }, { name: "矢　賀", pos: 664 }, { name: "広　島", pos: 122 }, 
+
+
   ];
 
   const formatTime = date => date.toLocaleTimeString('ja-JP', { hour12: false });
@@ -244,8 +234,8 @@
 
   const fetchTrains = async () => {
   const urls = [
-    `https://api.allorigins.win/raw?url=https://www.train-guide.westjr.co.jp/api/v3/sanin4.json&t=${Date.now()}`,
-    `https://api.allorigins.win/raw?url=https://www.train-guide.westjr.co.jp/api/v3/sanin3.json&t=${Date.now()}`
+    `https://api.allorigins.win/raw?url=https://www.train-guide.westjr.co.jp/api/v3/geibi1.json&t=${Date.now()}`,
+    
   ];
 
 
