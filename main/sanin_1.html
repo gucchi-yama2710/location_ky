@@ -8,17 +8,25 @@
       background: #111;
       color: #fff;
       font-family: sans-serif;
-      padding: 10px;
+      padding: 30px;
     }
     .time {
       font-size: 14px;
       margin-bottom: 10px;
       color: #ccc;
+      position: fixed;
+      top: 10;
+      left: 0;
+      right: 0;
+      background: #111;
+      padding: 10px;
+      z-index: 10;
+      border-bottom: 1px solid #333;
     }
     .railway {
       display: flex;
       align-items: flex-start;
-      margin-top: 10px;
+      margin-top: 100px;
       position: relative;
       white-space: nowrap;
       overflow-x: auto;
@@ -73,11 +81,66 @@
       border-color: red;
       background-color: rgba(255, 0, 0, 0.3);
     }
+
+    .title {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #111;
+      color: #fff;
+      margin: 0;
+      padding: 10px 10px 0 10px;
+      font-size: 24px;
+      z-index: 11; /* `.time` より上に表示 */
+    }
+
+#trainList {
+      display: none !important;
+    }
+
+  #trainList {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 250px;
+    overflow-y: auto;
+    background-color: #222;
+    color: #fff;
+    padding: 10px;
+    border-top: 2px solid #555;
+    z-index: 1000;
+  }
+
+  .train-column {
+    display: inline-block;
+    vertical-align: top;
+    width: 49%;
+    padding: 5px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  th, td {
+    border: 1px solid #555;
+    padding: 4px;
+    text-align: center;
+  }
+
+  h2 {
+    margin: 5px 0;
+    font-size: 14px;
+  }
   </style>
 </head>
 <body>
 
-<h1>山陰本線在線（諸寄 - 益田）</h1>
+<h1 class="title">山陰本線在線（諸寄 - 益田）</h1>
 <div class="time">
   <div>現在時刻: <span id="nowTime"></span></div>
   <div>最終更新: <span id="updateTime"></span></div>
@@ -188,6 +251,87 @@
     `https://api.allorigins.win/raw?url=https://www.train-guide.westjr.co.jp/api/v3/sanin3.json&t=${Date.now()}`
   ];
 
+
+
+
+
+const renderTrainList = trains => {
+  const container = document.getElementById("trainList");
+  if (!container) return;
+
+  // posが範囲の場合、最小値（上り）や最大値（下り）で比較
+  const getPosValue = pos => {
+  if (typeof pos === "string" && pos.includes("_")) {
+    const [start] = pos.split("_");
+    return Number(start);  // 常に開始位置のみ使用
+  }
+  return Number(pos);
+};
+
+
+  // 上下を分けて、ここで個別に並び替え
+const upTrains = trains
+  .filter(train => parseInt(train.no) % 2 === 0)
+  .sort((a, b) => getPosValue(b.pos) - getPosValue(a.pos)); // 上り → 降順に変更
+
+const downTrains = trains
+  .filter(train => parseInt(train.no) % 2 === 1)
+  .sort((a, b) => getPosValue(a.pos) - getPosValue(b.pos)); // 下り → 昇順に変更
+
+
+  const makeTable = trainArray => {
+    let html = `<table><thead><tr>
+      <th>列車番号</th><th>行き先</th><th>位置</th><th>遅延</th>
+    </tr></thead><tbody>`;
+
+    trainArray.forEach(train => {
+      let location;
+      if (typeof train.pos === "string" && train.pos.includes("_")) {
+  const [from, to] = train.pos.split("_");
+  const fromName = stations.find(s => s.pos == from)?.name || from;
+  const toName = stations.find(s => s.pos == to)?.name || to;
+
+  const isUp = parseInt(train.no) % 2 === 0;
+  location = isUp
+    ? `駅間（${toName} ← ${fromName}）`
+    : `駅間（${fromName} → ${toName}）`;
+}
+ else {
+        location = stations.find(s => s.pos == train.pos)?.name || "不明";
+      }
+
+      html += `<tr>
+        <td>${train.no}</td>
+        <td>${train.dest}</td>
+        <td>${location}</td>
+        <td>${train.delayMinutes ? `${train.delayMinutes}分` : "定刻"}</td>
+      </tr>`;
+    });
+
+    html += "</tbody></table>";
+    return html;
+  };
+
+  container.innerHTML = `
+    <div class="train-column">
+      <h2>⬅ 上り（降順）</h2>
+      ${makeTable(upTrains)}
+    </div>
+    <div class="train-column">
+      <h2>下り（昇順） ➡</h2>
+      ${makeTable(downTrains)}
+    </div>
+  `;
+};
+
+
+
+
+
+
+
+
+
   try {
     const results = await Promise.all(
       urls.map(url =>
@@ -200,6 +344,8 @@
 
     const allTrains = results.flatMap(data => data.trains || []);
     renderRailway(allTrains);
+    renderTrainList(allTrains);
+
     document.getElementById("updateTime").textContent = formatTime(new Date());
   } catch (e) {
     console.error("Failed to fetch train data:", e);
@@ -211,6 +357,8 @@
   setInterval(fetchTrains, 5000);
   fetchTrains();
 </script>
+<!-- 🚋 列車一覧表示エリア -->
+<div id="trainList" class="train-list"></div>
 
 </body>
 </html>
